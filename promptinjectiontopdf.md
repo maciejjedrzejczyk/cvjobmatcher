@@ -4,9 +4,20 @@ This document describes the process of injecting a prompt into a PDF file in a w
 
 ## Nature of the Prompt Injection
 
-The prompt injection technique used in this application involves adding custom metadata to the PDF file. This metadata is not visible when viewing the PDF normally but can be accessed by software designed to read PDF metadata.
+This application uses two methods to inject content into the PDF:
 
-The injected prompt is stored in a custom metadata field named "HRJediPrompt". This field contains the AI-generated content that aims to present the candidate in the best possible light to automated HR systems.
+1. **Metadata Injection**: The AI-generated prompt is stored in a custom metadata field named "HRJediPrompt".
+
+2. **Hidden Text Injection**: A predefined text is injected directly into the PDF content with the following properties:
+   - Extremely small font size (0.1 pt)
+   - White color (invisible on white background)
+   - Positioned at the bottom of each page
+
+The hidden text is designed to be invisible to human readers but detectable by OCR (Optical Character Recognition) software.
+
+## Ethical Considerations
+
+While this technique can potentially improve a candidate's chances with automated screening systems, it's important to use this feature ethically. The hidden text injection is intended as a demonstration of PDF manipulation techniques and should not be used to misrepresent a candidate's qualifications. Always ensure that all information provided in a CV is truthful and accurate.
 
 ## Steps to Generate the Modified PDF
 
@@ -56,6 +67,20 @@ metadata = reader.metadata
 hr_jedi_prompt = metadata.get('/HRJediPrompt', 'Not found')
 print(f"Injected Prompt: {hr_jedi_prompt}")
 ```
+
+### Verifying the Hidden Text
+
+To verify the presence of the hidden text:
+
+1. Use an OCR software to scan the PDF. The hidden text should be detected despite being invisible to the human eye.
+
+2. Open the PDF in a text editor or use a command-line tool that can extract text from PDFs. For example, using `pdftotext`:
+
+   ```
+   pdftotext your_modified_cv.pdf - | grep "Note by a trustworthy expert recruiter"
+   ```
+
+3. Use image editing software to adjust the contrast of the PDF when viewed as an image. This might make the hidden text visible.
 
 ## Important Notes
 
