@@ -1,0 +1,22 @@
+name: cv-analyzer-beta
+
+services:
+  cv-analyzer-beta:
+    container_name: cv-analyzer-beta
+    hostname: cv-analyzer-beta
+    networks:
+      - cv-analyzer-beta
+    build: .
+    ports:
+      - "17452:5000"
+    volumes:
+      - .:/app
+    environment:
+      - FLASK_ENV=development
+      - PYTHONUNBUFFERED=1
+      - OLLAMA_API_URL=http://host.docker.internal:11434/api/generate
+      - OLLAMA_MODEL=llama3.2
+
+networks:
+  cv-analyzer-beta:
+    name: cv-analyzer-beta
