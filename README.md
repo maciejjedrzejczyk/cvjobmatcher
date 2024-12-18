@@ -63,7 +63,64 @@ CV Job Matcher is an AI-powered web application that analyzes a candidate's CV a
 - English: `llama3.2:3b-instruct-q8_0`
 - Polish: `SpeakLeash/bielik-11b-v2.3-instruct:Q4_K_M`
 
-## Development Process
+## How is my data being processed by this application?
+
+You're asking an important question about the architecture and data flow of the application. Let me clarify the process:
+
+The PDF document processing is happening on the server side, not in the browser. Here's the flow:
+
+1. Client Side (Browser):
+   - The user selects a PDF file using the file input in the HTML form.
+   - When the form is submitted (either with the "Process" button or the "HR Jedi Skill" button), the PDF file is sent to the server as part of the form data.
+
+2. Server Side (Flask Application):
+   - The server receives the uploaded PDF file.
+   - The PDF processing, including text extraction and modification, happens on the server using Python libraries like PyPDF2 and ReportLab.
+   - For the HR Jedi Skill, the server injects the metadata and hidden text into the PDF.
+
+3. Back to Client Side:
+   - The server sends the processed results back to the client.
+   - For the HR Jedi Skill, the modified PDF is sent back to the browser as a base64-encoded string.
+   - The browser then creates a download link for the modified PDF.
+
+Here are the relevant parts of the code that confirm this:
+
+In `app.py`:
+
+```python
+@app.route('/process_hr_jedi', methods=['POST'])
+def process_hr_jedi():
+    # ...
+    cv_file = request.files['cv']
+    # ...
+    modified_pdf = inject_prompt_into_pdf(cv_file, hr_jedi_prompt)
+    # Encode the modified PDF as base64
+    encoded_pdf = base64.b64encode(modified_pdf.getvalue()).decode('utf-8')
+    # ...
+```
+
+This code shows that the CV file is received by the server (`request.files['cv']`), processed (`inject_prompt_into_pdf`), and then sent back as a base64-encoded string.
+
+In `script.js`:
+
+```javascript
+function provideModifiedPDF(encodedPdf) {
+    var pdfBlob = base64toBlob(encodedPdf, 'application/pdf');
+    var pdfUrl = URL.createObjectURL(pdfBlob);
+    
+    var downloadLink = '<a href="' + pdfUrl + '" download="enhanced_cv.pdf" class="btn btn-success me-2">Download Enhanced CV</a>';
+    // ...
+}
+```
+
+This JavaScript function receives the base64-encoded PDF from the server, converts it to a Blob, and creates a download link for the user.
+
+So, to directly answer your question: The document is indeed uploaded to the server side, where all the PDF processing occurs. The browser only handles the initial file selection and the final presentation of the download link for the modified PDF.
+
+This server-side processing approach allows for more complex operations on the PDF and keeps the sensitive logic (like the prompt injection) on the server, which is generally more secure than processing it in the browser.
+
+## How did you develop this application?
+
 This project was developed collaboratively with the assistance of Claude, an AI language model. The development process involved:
 
 - 30+ conversation turns
@@ -79,10 +136,11 @@ This project was developed collaboratively with the assistance of Claude, an AI 
 
 Claude played a crucial role in providing code suggestions, troubleshooting issues, and offering explanations throughout the development process.
 
-## PDF Prompt Injection
+## Where can I learn more about PDF Prompt Injection technique used in this application?
+
 For detailed information about the PDF prompt injection technique used in this application, please refer to the [promptinjectiontopdf.md](https://github.com/maciejjedrzejczyk/cvjobmatcher/blob/main/promptinjectiontopdf.md) file in this repository.
 
-## Contributing
+## How can I contribute?
 Contributions to improve CV Job Matcher are welcome. Please feel free to submit a Pull Request.
 
 ## License
